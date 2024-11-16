@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./controllers/server.js",
-    "dev": "nodemon ./controllers/server.js"
+    "generate-docs": "node swagger.js",
+    "start": "npm run generate-docs && node ./controllers/server.js",
+    "dev": "npm run generate-docs && nodemon ./controllers/server.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -12,7 +13,9 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11"
+    "pug": "2.0.0-beta11",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

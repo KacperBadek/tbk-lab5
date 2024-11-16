@@ -21,12 +21,22 @@
   },
   {
     "id": 3,
-    "name": "Chleb Razowy",
+    "name": "Chlep Razowy",
     "category": "Żywność",
     "quantity": 200,
     "unitPrice": 3.49,
-    "description": "Świeży chleb razowy pieczony codziennie z naturalnych składników, bez konserwantów.",
+    "description": "Chlebek",
     "dateAdded": "2024-10-20",
     "supplier": "BakeryFresh"
+  },
+  {
+    "id": 4,
+    "name": "Laptop DEF",
+    "category": "Elektronika",
+    "quantity": 10,
+    "unitPrice": 1500.99,
+    "description": "Wydajny laptop z procesorem Intel i7, 16GB RAM, i 512GB SSD.",
+    "dateAdded": "2024-11-16",
+    "supplier": "TechSupplier Inc."
   }
 ]
