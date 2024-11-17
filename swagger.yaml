@@ -1,0 +1,285 @@
+openapi: 3.0.0
+info:
+  title: Products API
+  description: API do zarządzania produktami
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+paths:
+  /products:
+    get:
+      summary: Pobierz wszystkie produkty
+      responses:
+        200:
+          description: Lista produktów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        500:
+          description: Błąd serwera
+    post:
+      summary: Dodaj nowy produkt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - category
+                - quantity
+                - unitPrice
+                - description
+                - dateAdded
+                - supplier
+              properties:
+                name:
+                  type: string
+                  description: Nazwa produktu
+                  example: "Pralka ABC"
+                category:
+                  type: string
+                  description: Kategoria produktu
+                  example: "Elektronika"
+                quantity:
+                  type: integer
+                  description: Ilość dostępnych sztuk
+                  example: 20
+                unitPrice:
+                  type: number
+                  format: float
+                  description: Cena jednostkowa
+                  example: 299.99
+                description:
+                  type: string
+                  description: Opis produktu
+                  example: "Pralka."
+                dateAdded:
+                  type: string
+                  format: date
+                  description: Data dodania produktu
+                  example: "2024-04-15"
+                supplier:
+                  type: string
+                  description: Dostawca produktu
+                  example: "TechSupply Co."
+      responses:
+        201:
+          description: Produkt dodany pomyślnie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: Nieprawidłowe dane wejściowe
+        500:
+          description: Błąd serwera
+
+  /products/search:
+    get:
+      summary: Wyszukaj produkty
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Kategoria produktu
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+          description: Minimalna cena
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+          description: Maksymalna cena
+        - name: supplier
+          in: query
+          schema:
+            type: string
+          description: Dostawca produktu
+      responses:
+        200:
+          description: Lista znalezionych produktów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        404:
+          description: Nie znaleziono produktów
+
+  /products/{id}:
+    get:
+      summary: Pobierz produkt po ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID produktu
+      responses:
+        200:
+          description: Produkt znaleziony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          description: Produkt nie znaleziony
+    put:
+      summary: Zaktualizuj produkt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID produktu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - category
+                - quantity
+                - unitPrice
+                - description
+                - dateAdded
+                - supplier
+              properties:
+                name:
+                  type: string
+                  description: Nazwa produktu
+                  example: "Laptop DEF"
+                category:
+                  type: string
+                  description: Kategoria produktu
+                  example: "Elektronika"
+                quantity:
+                  type: integer
+                  description: Ilość dostępnych sztuk
+                  example: 50
+                unitPrice:
+                  type: number
+                  format: float
+                  description: Cena jednostkowa
+                  example: 1500.99
+                description:
+                  type: string
+                  description: Opis produktu
+                  example: "Wydajny laptop z procesorem Intel i7, 16GB RAM, i 512GB SSD."
+                dateAdded:
+                  type: string
+                  format: date
+                  description: Data dodania produktu
+                  example: "2024-04-15"
+                supplier:
+                  type: string
+                  description: Dostawca produktu
+                  example: "TechSupply Co."
+      responses:
+        200:
+          description: Produkt zaktualizowany pomyślnie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          description: Nieprawidłowe dane wejściowe
+        404:
+          description: Produkt nie znaleziony
+        500:
+          description: Błąd serwera
+    patch:
+      summary: Zaktualizuj część danych produktu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID produktu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Dane do zaktualizowania
+      responses:
+        200:
+          description: Produkt zaktualizowany pomyślnie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          description: Produkt nie znaleziony
+        500:
+          description: Błąd serwera
+    delete:
+      summary: Usuń produkt po ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID produktu
+      responses:
+        204:
+          description: Produkt usunięty pomyślnie
+        404:
+          description: Produkt nie znaleziony
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unikalne ID produktu
+        name:
+          type: string
+          description: Nazwa produktu
+        category:
+          type: string
+          description: Kategoria produktu
+        quantity:
+          type: integer
+          description: Ilość dostępnych sztuk
+        unitPrice:
+          type: number
+          format: float
+          description: Cena jednostkowa
+        description:
+          type: string
+          description: Opis produktu
+        dateAdded:
+          type: string
+          format: date
+          description: Data dodania produktu
+        supplier:
+          type: string
+          description: Dostawca produktu
+      example:
+        id: 1
+        name: "Smartfon XYZ"
+        category: "Elektronika"
+        quantity: 50
+        unitPrice: 299.99
+        description: "Nowoczesny smartfon z 6.5-calowym wyświetlaczem, aparatem 48MP i baterią o pojemności 4000mAh."
+        dateAdded: "2024-04-15"
+        supplier: "TechSupply Co."

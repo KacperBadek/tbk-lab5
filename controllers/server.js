@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const fs = require("node:fs");
+const YAML = require('yamljs');
 const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('../error-handling/errorHandler');
@@ -23,15 +24,12 @@ app.use(bodyParser.json());
 app.use('/products', productsRouter)
 app.use(express.static(path.join(__dirname, '../public')));
 
-const swaggerDocument = require("../swagger_output.json");
+//const swaggerDocument = require("../swagger_output.json");
+const swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => {
     res.send('Witaj w aplikacji Express.js!');
-})
-
-app.get('/index.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
 })
 
 app.use(notFoundHandler)

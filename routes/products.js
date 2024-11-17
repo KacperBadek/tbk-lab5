@@ -13,21 +13,6 @@ const saveProducts = (products) => {
     fs.writeFileSync(filePath, JSON.stringify(products, null, 2), 'utf8');
 };
 
-/**
- * @swagger
- * /students:
- *   get:
- *     summary: Pobierz listę wszystkich produktów
- *     responses:
- *       200:
- *         description: Lista produktów
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Student'
- */
 router.get('/', (req, res) => {
     try {
         const products = getProducts();
@@ -37,45 +22,6 @@ router.get('/', (req, res) => {
     }
 })
 
-/**
- * @swagger
- * /products/search:
- *   get:
- *     summary: Search products based on query parameters
- *     tags: [Products]
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: The category to search for
- *       - in: query
- *         name: minPrice
- *         schema:
- *           type: number
- *         description: The minimum price to filter by
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *         description: The maximum price to filter by
- *       - in: query
- *         name: supplier
- *         schema:
- *           type: string
- *         description: The supplier name to filter by
- *     responses:
- *       200:
- *         description: List of filtered products
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *       404:
- *         description: No products found matching the criteria
- */
 router.get('/search', (req, res) => {
     const {category, minPrice, maxPrice, supplier} = req.query;
     const products = getProducts();

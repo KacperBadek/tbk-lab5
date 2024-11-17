@@ -21,16 +21,6 @@
         }
       }
     },
-    "/index.html": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/products/": {
       "get": {
         "description": "",

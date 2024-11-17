@@ -33,10 +33,10 @@
     "id": 4,
     "name": "Laptop DEF",
     "category": "Elektronika",
-    "quantity": 10,
+    "quantity": 50,
     "unitPrice": 1500.99,
     "description": "Wydajny laptop z procesorem Intel i7, 16GB RAM, i 512GB SSD.",
-    "dateAdded": "2024-11-16",
-    "supplier": "TechSupplier Inc."
+    "dateAdded": "2024-04-15",
+    "supplier": "TechSupply Co."
   }
 ]
