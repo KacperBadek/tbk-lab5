@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require("node:fs");
 const path = require('path');
+const {check, validationResult} = require('express-validator');
 const router = express.Router();
 
 const getProducts = () => {
@@ -12,6 +13,37 @@ const saveProducts = (products) => {
     const filePath = path.join(__dirname, '../data/products.json');
     fs.writeFileSync(filePath, JSON.stringify(products, null, 2), 'utf8');
 };
+
+
+const productValidationRules = [
+    check('name').isString().withMessage('Name is required')
+        .isLength({min: 3}).withMessage('Name must be at least 3 characters long')
+        .notEmpty().withMessage('Name is required'),
+    check('category').isString().withMessage('Category must be a string')
+        .notEmpty().withMessage('Category is required'),
+    check('quantity').isInt({gt: 0}).withMessage('Quantity must be a positive integer')
+        .notEmpty().withMessage('Quantity is required'),
+    check('unitPrice').isFloat({gt: 0}).withMessage('Unit Price must be a positive number')
+        .notEmpty().withMessage('Unit Price is required'),
+    check('description').isString().withMessage('Description must be a string')
+        .isLength({min: 3}).withMessage('Description must be at least 3 characters long')
+        .notEmpty().withMessage('Description is required'),
+    check('dateAdded').isISO8601().withMessage('Date Added must be a valid date')
+        .notEmpty().withMessage('Date Added is required'),
+    check('supplier').isString().withMessage('Supplier must be a string')
+        .isLength({min: 3}).withMessage('Supplier must be at least 3 characters long')
+        .notEmpty().withMessage('Supplier is required')
+];
+
+const patchValidation = [
+    check('name').optional().isString().isLength({min: 3}).withMessage('Name must be at least 3 characters long'),
+    check('category').optional().isString().withMessage('Category must be a string'),
+    check('quantity').optional().isInt({gt: 0}).withMessage('Quantity must be a positive integer'),
+    check('unitPrice').optional().isFloat({gt: 0}).withMessage('Unit Price must be a positive number'),
+    check('description').optional().isString().isLength({min: 3}).withMessage('Description must be at least 3 characters long'),
+    check('dateAdded').optional().isISO8601().withMessage('Date Added must be a valid date'),
+    check('supplier').optional().isString().isLength({min: 3}).withMessage('Supplier must be at least 3 characters long')
+]
 
 router.get('/', (req, res) => {
     try {
@@ -55,7 +87,12 @@ router.get('/:id', (req, res) => {
 })
 
 
-router.post('/', (req, res) => {
+router.post('/', productValidationRules, (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
     try {
         const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
         if (!name || !category || !quantity || !unitPrice || !description || !dateAdded || !supplier) {
@@ -77,7 +114,12 @@ router.post('/', (req, res) => {
 })
 
 
-router.put('/:id', (req, res) => {
+router.put('/:id', productValidationRules, (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()});
+    }
+
     try {
         const productId = parseInt(req.params.id);
         const products = getProducts();
@@ -114,7 +156,12 @@ router.put('/:id', (req, res) => {
 })
 
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', patchValidation, (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const productId = parseInt(req.params.id);
     const updatedProduct = req.body;
     const products = getProducts();
@@ -129,39 +176,6 @@ router.patch('/:id', (req, res) => {
     saveProducts(products);
 })
 
-/**
- * @swagger
- * /products/{id}:
- *   delete:
- *     summary: Usuń produkt po ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID produktu
- *     responses:
- *       200:
- *         description: Produkt usunięty pomyślnie
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Produkt nie znaleziony
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- */
 router.delete('/:id', (req, res) => {
     const productId = parseInt(req.params.id);
     const products = getProducts();

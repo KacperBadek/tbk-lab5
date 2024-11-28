@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const fs = require("node:fs");
 const YAML = require('yamljs');
 const bodyParser = require('body-parser');
@@ -9,6 +10,12 @@ const notFoundHandler = require('../error-handling/notFoundHandler');
 const productsRouter = require('../routes/products');
 const swaggerUi = require("swagger-ui-express");
 
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     const start = Date.now();
@@ -20,9 +27,38 @@ app.use((req, res, next) => {
     next();
 })
 
-app.use(bodyParser.json());
+app.use((req, res, next) => {
+    const originalJson = res.json.bind(res); //.bind to kopia metody res.json
+    res.json = (data) => { //zmieniamy res.json na fukcje
+        if (Array.isArray(data)) {
+            data = data.map(item => ({ ...item, timestamp: new Date().toISOString() }));
+        } else if (typeof data === 'object' && data !== null) {
+            data.timestamp = new Date().toISOString();
+        }
+        originalJson(data); //wywołujemy funkcje
+    };
+    next();
+});
+
+app.use(express.json());
+
+
+app.use((req, res, next) => {
+    if (req.body && typeof req.body === 'object') {
+        Object.keys(req.body).forEach(key => {
+            if (typeof req.body[key] === 'string') {
+                req.body[key] = req.body[key].toLowerCase();
+            }
+        });
+    }
+    next();
+});
+
 app.use('/products', productsRouter)
 app.use(express.static(path.join(__dirname, '../public')));
+
+
+
 
 //const swaggerDocument = require("../swagger_output.json");
 const swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
