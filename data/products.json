@@ -21,22 +21,32 @@
   },
   {
     "id": 3,
-    "name": "Chlep Razowy",
-    "category": "Żywność",
+    "name": "chleb razowy",
+    "category": "żywność",
     "quantity": 200,
     "unitPrice": 3.49,
-    "description": "Chlebek",
+    "description": "chlebek",
     "dateAdded": "2024-10-20",
-    "supplier": "BakeryFresh"
+    "supplier": "bakeryfresh"
   },
   {
     "id": 4,
-    "name": "Laptop DEF",
-    "category": "Elektronika",
+    "name": "laptop def",
+    "category": "elektronika",
     "quantity": 50,
-    "unitPrice": 1500.99,
-    "description": "Wydajny laptop z procesorem Intel i7, 16GB RAM, i 512GB SSD.",
+    "unitPrice": 220.99,
+    "description": "wydajny laptop z procesorem intel i7, 16gb ram, i 512gb ssd.",
     "dateAdded": "2024-04-15",
-    "supplier": "TechSupply Co."
+    "supplier": "techsupply co."
+  },
+  {
+    "id": 5,
+    "name": "pralka",
+    "category": "elektronika",
+    "quantity": 33,
+    "unitPrice": 33,
+    "description": "adas",
+    "dateAdded": "2024-12-05",
+    "supplier": "asdas"
   }
 ]
