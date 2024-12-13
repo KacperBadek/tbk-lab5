@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose')
+const MONGO_URI = 'mongodb://root:example@localhost:27017/products?authSource=admin';
 const cors = require('cors');
 const fs = require("node:fs");
 const YAML = require('yamljs');
@@ -8,6 +10,7 @@ const path = require('path');
 const errorHandler = require('../error-handling/errorHandler');
 const notFoundHandler = require('../error-handling/notFoundHandler');
 const productsRouter = require('../routes/products');
+const categoryRouter = require('../routes/category')
 const swaggerUi = require("swagger-ui-express");
 
 const corsOptions = {
@@ -16,6 +19,10 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
+
+mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true})
+    .then(() => console.log("Connected to mongoDB"))
+    .catch(er => console.log("Failed", er))
 
 app.use((req, res, next) => {
     const start = Date.now();
@@ -31,7 +38,7 @@ app.use((req, res, next) => {
     const originalJson = res.json.bind(res); //.bind to kopia metody res.json
     res.json = (data) => { //zmieniamy res.json na fukcje
         if (Array.isArray(data)) {
-            data = data.map(item => ({ ...item, timestamp: new Date().toISOString() }));
+            data = data.map(item => ({...item, timestamp: new Date().toISOString()}));
         } else if (typeof data === 'object' && data !== null) {
             data.timestamp = new Date().toISOString();
         }
@@ -55,9 +62,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/products', productsRouter)
+app.use('/categories', categoryRouter)
 app.use(express.static(path.join(__dirname, '../public')));
-
-
 
 
 //const swaggerDocument = require("../swagger_output.json");

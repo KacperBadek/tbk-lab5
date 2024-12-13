@@ -1,13 +1,13 @@
 [
   {
     "id": 1,
-    "name": "Smartfon XYZ",
-    "category": "Elektronika",
+    "name": "smartfon xyz",
+    "category": "elektronika",
     "quantity": 50,
     "unitPrice": 299.99,
-    "description": "Nowoczesny smartfon z 6.5-calowym wyświetlaczem, aparatem 48MP i baterią o pojemności 4000mAh.",
+    "description": "nowoczesny smartfon z 6.5-calowym wyświetlaczem, aparatem 48mp i baterią o pojemności 4000mah.",
     "dateAdded": "2024-04-15",
-    "supplier": "TechSupply Co."
+    "supplier": "techsupply co."
   },
   {
     "id": 2,
@@ -38,5 +38,15 @@
     "description": "Wydajny laptop z procesorem Intel i7, 16GB RAM, i 512GB SSD.",
     "dateAdded": "2024-04-15",
     "supplier": "TechSupply Co."
+  },
+  {
+    "id": 5,
+    "name": "pralka",
+    "category": "elektronika",
+    "quantity": 33,
+    "unitPrice": 33,
+    "description": "adsa",
+    "dateAdded": "2024-12-06",
+    "supplier": "ada"
   }
 ]

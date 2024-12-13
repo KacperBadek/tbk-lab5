@@ -3,17 +3,8 @@ const fs = require("node:fs");
 const path = require('path');
 const {check, validationResult} = require('express-validator');
 const router = express.Router();
-
-const getProducts = () => {
-    const filePath = path.join(__dirname, '../data/products.json');
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-};
-
-const saveProducts = (products) => {
-    const filePath = path.join(__dirname, '../data/products.json');
-    fs.writeFileSync(filePath, JSON.stringify(products, null, 2), 'utf8');
-};
-
+const Product = require('../models/Product')
+const Category = require('../models/Category')
 
 const productValidationRules = [
     check('name').isString().withMessage('Name is required')
@@ -37,7 +28,7 @@ const productValidationRules = [
 
 const patchValidation = [
     check('name').optional().isString().isLength({min: 3}).withMessage('Name must be at least 3 characters long'),
-    check('category').optional().isString().withMessage('Category must be a string'),
+    check('category').optional().isMongoId().withMessage('Category must be a valid ID'),
     check('quantity').optional().isInt({gt: 0}).withMessage('Quantity must be a positive integer'),
     check('unitPrice').optional().isFloat({gt: 0}).withMessage('Unit Price must be a positive number'),
     check('description').optional().isString().isLength({min: 3}).withMessage('Description must be at least 3 characters long'),
@@ -45,100 +36,59 @@ const patchValidation = [
     check('supplier').optional().isString().isLength({min: 3}).withMessage('Supplier must be at least 3 characters long')
 ]
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const products = getProducts();
+        const products = await Product.find().populate('category', 'name');
         res.json(products);
     } catch (err) {
-        res.status(500).json({error: "Failed to load products data"});
+        res.status(500).json({error: 'Failed to load products data'});
     }
 })
 
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
     const {category, minPrice, maxPrice, supplier} = req.query;
-    const products = getProducts();
-
-    const filteredProducts = products.filter(product => {
-        return (
-            (!category || product.category === category) &&
-            (!minPrice || product.unitPrice >= parseFloat(minPrice)) &&
-            (!maxPrice || product.unitPrice <= parseFloat(maxPrice)) &&
-            (!supplier || product.supplier === supplier)
-        );
-    });
-    if (filteredProducts.length === 0) {
-        res.status(404).json({message: "Brak takich produktów"})
-    }
-    res.json(filteredProducts);
-})
-
-
-router.get('/:id', (req, res) => {
-    const productId = parseInt(req.params.id);
-    const products = getProducts();
-
-    const product = products.find(product => product.id === productId)
-    if (!product) {
-        res.status(404).json({
-            message: `No product with id ${productId} found.`
-        })
-    }
-    res.json(product);
-})
-
-
-router.post('/', productValidationRules, (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({errors: errors.array()});
-    }
 
     try {
-        const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
-        if (!name || !category || !quantity || !unitPrice || !description || !dateAdded || !supplier) {
-            return res.status(400).json({error: "All fields are required"});
+        const filter = {};
+        if (category) filter.category = category;
+        if (minPrice) filter.unitPrice = {$gte: parseFloat(minPrice)};
+        if (maxPrice) filter.unitPrice = {...filter.unitPrice, $lte: parseFloat(maxPrice)};
+        if (supplier) filter.supplier = supplier;
+
+        const products = await Product.find(filter).populate('category', 'name');
+        if (products.length === 0) {
+            return res.status(404).json({message: 'No products found'});
         }
-
-        const products = getProducts();
-        const lastId = products.length > 0 ? products[products.length - 1].id : 0;
-        const newProduct = {id: lastId + 1, name, category, quantity, unitPrice, description, dateAdded, supplier};
-
-        products.push(newProduct);
-        saveProducts(products);
-
-        res.status(201).json(newProduct);
+        res.json(products);
     } catch (err) {
-        console.error("Error in POST /products:", err);
-        res.status(500).json({error: "Failed to add product"});
+        res.status(500).json({error: 'Failed to search products'});
     }
 })
 
 
-router.put('/:id', productValidationRules, (req, res) => {
+router.get('/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id).populate('category', 'name');
+        if (!product) {
+            return res.status(404).json({message: `No product with id ${req.params.id} found.`});
+        }
+        res.json(product);
+    } catch (err) {
+        res.status(500).json({error: 'Failed to retrieve product'});
+    }
+})
+
+
+router.post('/', productValidationRules, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({errors: errors.array()});
     }
 
+    const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
+
     try {
-        const productId = parseInt(req.params.id);
-        const products = getProducts();
-        const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
-
-        if (!name || !category || !quantity || !unitPrice || !description || !dateAdded || !supplier) {
-            return res.status(400).json({error: "All fields are required"});
-        }
-
-        const productIndex = products.findIndex(product => product.id === productId);
-
-        if (productIndex === -1) {
-            return res.status(404).json({
-                message: `No product with id ${productId} found.`
-            });
-        }
-
-        products[productIndex] = {
-            id: productId,
+        const newProduct = new Product({
             name,
             category,
             quantity,
@@ -146,47 +96,76 @@ router.put('/:id', productValidationRules, (req, res) => {
             description,
             dateAdded,
             supplier
-        };
+        });
 
-        saveProducts(products);
-        res.status(200).json(products[productIndex]);
+        const savedProduct = await newProduct.save();
+        res.status(201).json(savedProduct);
     } catch (err) {
-        res.status(500).json({error: "Failed to edit product"});
+        console.error('Error in creating product:', err);
+        res.status(500).json({error: 'Internal server error'});
     }
 })
 
 
-router.patch('/:id', patchValidation, (req, res) => {
+router.put('/:id', productValidationRules, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({errors: errors.array()});
     }
 
-    const productId = parseInt(req.params.id);
-    const updatedProduct = req.body;
-    const products = getProducts();
+    const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
 
+    try {
 
-    const product = products.find(product => product.id === productId);
-    if (!product) {
-        return res.status(404).json({message: `No product with id ${productId} found.`});
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            {name, category, quantity, unitPrice, description, dateAdded, supplier},
+            {new: true, runValidators: true}
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({message: `No product with id ${req.params.id} found.`});
+        }
+
+        res.json(updatedProduct);
+    } catch (err) {
+        console.error('Error in updating product:', err);
+        res.status(500).json({error: 'Internal server error'});
     }
+})
 
-    Object.assign(product, updatedProduct);
-    saveProducts(products);
+
+router.patch('/:id', patchValidation, async (req, res) => {
+    try {
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            {$set: req.body},
+            {new: true}
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({message: `No product with id ${req.params.id} found.`});
+        }
+
+        res.json(updatedProduct);
+    } catch (err) {
+        console.error('Error in patching product:', err);
+        res.status(500).json({error: 'Internal server error'});
+    }
 })
 
 router.delete('/:id', (req, res) => {
-    const productId = parseInt(req.params.id);
-    const products = getProducts();
 
-    const filteredProducts = products.filter(product => product.id !== productId);
-    if (filteredProducts.length === products.length) {
-        return res.status(404).json({message: `No product with id ${productId} found.`});
+    try {
+        const deletedProduct = Product.findByIdAndDelete(req.params.id);
+        if (!deletedProduct) {
+            return res.status(404).json({message: `No product with id ${req.params.id} found.`})
+        }
+
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({error: "Failed to delete product"});
     }
-
-    saveProducts(filteredProducts);
-    res.status(204).send();
 })
 
 module.exports = router
