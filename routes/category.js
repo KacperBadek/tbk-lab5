@@ -25,4 +25,20 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const deletedCategory = await Category.findByIdAndDelete(id);
+
+        if (!deletedCategory) {
+            return res.status(404).json({message: `No category with id ${req.params.id} found.`})
+        }
+
+        res.status(200).json({message: 'Product deleted successfully', category: deletedCategory});
+    } catch (error) {
+        res.status(500).json({error: "Failed to delete product"});
+    }
+})
+
+
 module.exports = router;

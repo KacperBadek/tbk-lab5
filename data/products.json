@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Smartfon XYZ",
+    "category": "Elektronika",
+    "quantity": 50,
+    "unitPrice": 299.99,
+    "description": "Nowoczesny smartfon z 6.5-calowym wyświetlaczem, aparatem 48MP i baterią o pojemności 4000mAh.",
+    "dateAdded": "2024-04-15",
+    "supplier": "TechSupply Co."
+  },
+  {
+    "id": 2,
+    "name": "Kurtka Zimowa ABC",
+    "category": "Odzież",
+    "quantity": 120,
+    "unitPrice": 89.99,
+    "description": "Ciepła kurtka zimowa wykonana z materiałów odpornych na wiatr i wodę, dostępna w różnych rozmiarach.",
+    "dateAdded": "2024-05-10",
+    "supplier": "FashionHouse Ltd."
+  },
+  {
+    "id": 3,
+    "name": "chleb razowy",
+    "category": "żywność",
+    "quantity": 200,
+    "unitPrice": 3.49,
+    "description": "chlebek",
+    "dateAdded": "2024-10-20",
+    "supplier": "bakeryfresh"
+  },
+  {
+    "id": 4,
+    "name": "laptop def",
+    "category": "elektronika",
+    "quantity": 50,
+    "unitPrice": 220.99,
+    "description": "wydajny laptop z procesorem intel i7, 16gb ram, i 512gb ssd.",
+    "dateAdded": "2024-04-15",
+    "supplier": "techsupply co."
+  },
+  {
+    "id": 5,
+    "name": "pralka",
+    "category": "elektronika",
+    "quantity": 33,
+    "unitPrice": 33,
+    "description": "adas",
+    "dateAdded": "2024-12-05",
+    "supplier": "asdas"
+  }
+]

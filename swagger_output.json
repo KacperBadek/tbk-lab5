@@ -42,25 +42,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
-                  "example": "any"
-                },
                 "category": {
-                  "example": "any"
-                },
-                "quantity": {
-                  "example": "any"
-                },
-                "unitPrice": {
-                  "example": "any"
-                },
-                "description": {
-                  "example": "any"
-                },
-                "dateAdded": {
-                  "example": "any"
-                },
-                "supplier": {
                   "example": "any"
                 }
               }
@@ -71,8 +53,8 @@
           "201": {
             "description": "Created"
           },
-          "400": {
-            "description": "Bad Request"
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -105,6 +87,22 @@
             "type": "string"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/products/total-price": {
+      "get": {
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
@@ -156,10 +154,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "name": {
+                "category": {
                   "example": "any"
                 },
-                "category": {
+                "name": {
                   "example": "any"
                 },
                 "quantity": {
@@ -184,9 +182,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "404": {
             "description": "Not Found"
@@ -222,9 +217,6 @@
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -244,8 +236,8 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "description": "OK"
           },
           "404": {
             "description": "Not Found"
@@ -287,6 +279,30 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/categories/{id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"

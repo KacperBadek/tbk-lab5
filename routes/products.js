@@ -65,6 +65,29 @@ router.get('/search', async (req, res) => {
     }
 })
 
+router.get('/total-price', async (req, res) => {
+    try {
+        const result = await Product.aggregate([{
+            $group: {
+                _id: null,
+                totalPrice: {
+                    $sum: {
+                        $multiply: ['$unitPrice', '$quantity']
+                    }
+                }
+            }
+        }])
+
+        if (result.length === 0) {
+            return res.status(404).json({message: 'No products found'});
+        }
+
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({error: 'Failed to retrieve total price'});
+    }
+})
+
 
 router.get('/:id', async (req, res) => {
     try {
@@ -80,26 +103,20 @@ router.get('/:id', async (req, res) => {
 
 
 router.post('/', productValidationRules, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({errors: errors.array()});
-    }
-
-    const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
-
     try {
-        const newProduct = new Product({
-            name,
-            category,
-            quantity,
-            unitPrice,
-            description,
-            dateAdded,
-            supplier
+        const newProductData = req.body;
+        let category = await Category.findOne({name: newProductData.category});
+        if (!category) {
+            return res.status(404).json({message: `No category with name ${newProductData.category} found.`});
+        }
+
+        const productToSave = new Product({
+            ...newProductData,
+            category: category._id,
         });
 
-        const savedProduct = await newProduct.save();
-        res.status(201).json(savedProduct);
+        await productToSave.save();
+        res.status(201).json(productToSave);
     } catch (err) {
         console.error('Error in creating product:', err);
         res.status(500).json({error: 'Internal server error'});
@@ -108,28 +125,37 @@ router.post('/', productValidationRules, async (req, res) => {
 
 
 router.put('/:id', productValidationRules, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({errors: errors.array()});
-    }
-
-    const {name, category, quantity, unitPrice, description, dateAdded, supplier} = req.body;
-
     try {
+        const {id} = req.params;
+        const updatedProductData = req.body;
+
+        let category = await Category.findOne({name: updatedProductData.category});
+        if (!category) {
+            return res.status(404).json({message: `No category with name ${updatedProductData.category} found.`});
+        }
+
+        const updateData = {
+            name: updatedProductData.name,
+            category: category._id,
+            quantity: updatedProductData.quantity,
+            unitPrice: updatedProductData.unitPrice,
+            description: updatedProductData.description,
+            dateAdded: updatedProductData.dateAdded,
+            supplier: updatedProductData.supplier
+        };
 
         const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id,
-            {name, category, quantity, unitPrice, description, dateAdded, supplier},
+            id, updateData,
             {new: true, runValidators: true}
         );
 
         if (!updatedProduct) {
-            return res.status(404).json({message: `No product with id ${req.params.id} found.`});
+            return res.status(404).json({message: `No product with id ${id} found.`});
         }
 
-        res.json(updatedProduct);
-    } catch (err) {
-        console.error('Error in updating product:', err);
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        console.log('Error in updating product:', error);
         res.status(500).json({error: 'Internal server error'});
     }
 })
@@ -137,14 +163,25 @@ router.put('/:id', productValidationRules, async (req, res) => {
 
 router.patch('/:id', patchValidation, async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id,
-            {$set: req.body},
-            {new: true}
-        );
+        const {id} = req.params;
+        const updatedProductData = req.body;
+
+        let category;
+        if (updatedProductData.category) {
+            category = await Category.findOne({name: updatedProductData.category});
+            if (!category) {
+                return res.status(404).json({message: `No category with name ${updatedProductData.category} found.`});
+            }
+            updatedProductData.category = category._id;
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(id, updatedProductData, {
+            new: true,
+            runValidators: true
+        });
 
         if (!updatedProduct) {
-            return res.status(404).json({message: `No product with id ${req.params.id} found.`});
+            return res.status(404).json({message: `No product with id ${id} found.`});
         }
 
         res.json(updatedProduct);
@@ -154,15 +191,16 @@ router.patch('/:id', patchValidation, async (req, res) => {
     }
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
 
     try {
-        const deletedProduct = Product.findByIdAndDelete(req.params.id);
+        const {id} = req.params;
+        const deletedProduct = await Product.findByIdAndDelete(id);
         if (!deletedProduct) {
             return res.status(404).json({message: `No product with id ${req.params.id} found.`})
         }
 
-        res.status(204).send();
+        res.status(200).send({message: 'Product deleted successfully', product: deletedProduct});
     } catch (error) {
         res.status(500).json({error: "Failed to delete product"});
     }

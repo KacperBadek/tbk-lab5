@@ -10,27 +10,12 @@ const productSchema = new mongoose.Schema({
     supplier: {type: String, required: true, minlength: 3}
 });
 
-productSchema.pre('save', async function (next) {
-    if (this.isModified('category')) {
-        const Category = mongoose.model('Category');
-        const categoryExists = await Category.findById(this.category);
-        if (!categoryExists) {
-            const err = new Error('Category does not exist');
-            return next(err);
-        }
+productSchema.pre('save', function (next) {
+    if (this.name) {
+        this.name = this.name.trim().toLowerCase();
     }
-    next();
-});
-
-productSchema.pre('findOneAndUpdate', async function (next) {
-    const update = this.getUpdate();
-    if (update && update.category) {
-        const Category = mongoose.model('Category');
-        const categoryExists = await Category.findById(update.category);
-        if (!categoryExists) {
-            const err = new Error('Category does not exist');
-            return next(err);
-        }
+    if (this.supplier) {
+        this.supplier = this.supplier.trim();
     }
     next();
 });
