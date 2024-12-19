@@ -9,8 +9,9 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const errorHandler = require('../error-handling/errorHandler');
 const notFoundHandler = require('../error-handling/notFoundHandler');
-const productsRouter = require('../routes/products');
-const categoryRouter = require('../routes/category')
+//const productsRouter = require('../routes/products');
+//const categoryRouter = require('../routes/category')
+const productsRouter = require('../routes/oldProductsService');
 const swaggerUi = require("swagger-ui-express");
 
 const corsOptions = {
@@ -20,9 +21,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true})
-    .then(() => console.log("Connected to mongoDB"))
-    .catch(er => console.log("Failed", er))
+// mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true})
+//     .then(() => console.log("Connected to mongoDB"))
+//     .catch(er => console.log("Failed", er))
 
 app.use((req, res, next) => {
     const start = Date.now();
@@ -62,7 +63,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/products', productsRouter)
-app.use('/categories', categoryRouter)
+//app.use('/categories', categoryRouter)
 app.use(express.static(path.join(__dirname, '../public')));
 
 
